@@ -22,7 +22,7 @@ def main(args):
     is_eval = args['eval']
     ckpt_dir = args['ckpt_dir']
     dataset_dir = args['dataset_dir']
-    dataset_dir = dataset_dir[0].split(" ")
+    dataset_dir = dataset_dir[0].split(" ")[0]
     policy_class = args['policy_class']
     onscreen_render = args['onscreen_render']
     task_name = args['task_name']
@@ -30,11 +30,8 @@ def main(args):
     batch_size_val = args['batch_size']
     num_epochs = args['num_epochs']
 
-   
-    num = ((len(glob.glob(dataset_dir[0] + "/*/*/")))*100)-3
-    assert num > 100  ## sanity check for data folder
     # fixed parameters
-    num_episodes = 6000 ## total trajectories for training
+    num_episodes = 90 ## total trajectories for training
     state_dim = 14
     lr_backbone = 1e-5
     backbone = 'resnet18'
@@ -125,16 +122,19 @@ def get_image(ts, camera_names):
         curr_image = rearrange(ts.observation['images'][cam_name], 'h w c -> c h w')
         curr_images.append(curr_image)
     curr_image = np.stack(curr_images, axis=0)
-    curr_image = torch.from_numpy(curr_image / 255.0).float().cuda().unsqueeze(0)
-    return curr_image
+    if torch.cuda.is_available():
+        return torch.from_numpy(curr_image / 255.0).float().cuda().unsqueeze(0)
+    else:
+        return torch.from_numpy(curr_image / 255.0).float().unsqueeze(0)
 
 
 
 
 def forward_pass(data, policy):
     image_data, qpos_data, action_data, is_pad , task_emb = data
-    image_data, qpos_data, action_data, is_pad = image_data.cuda(), qpos_data.cuda(), action_data.cuda(), is_pad.cuda()
-    task_emb = task_emb.cuda()
+    if torch.cuda.is_available():
+        image_data, qpos_data, action_data, is_pad = image_data.cuda(), qpos_data.cuda(), action_data.cuda(), is_pad.cuda()
+        task_emb = task_emb.cuda()
     return policy(qpos_data, image_data, action_data, is_pad,task_emb) # TODO remove None
 
 
@@ -150,7 +150,8 @@ def train_bc(train_dataloader, val_dataloader, config):
     wandb.init(name=f"{run_name}_B{config['batch_size']}_{config['lr']}", project="cactiv2")
     
     policy = make_policy(policy_class, policy_config)
-    policy.cuda()
+    if torch.cuda.is_available():
+        policy.cuda()
     optimizer = make_optimizer(policy_class, policy)
 
     train_history = []
@@ -182,6 +183,7 @@ def train_bc(train_dataloader, val_dataloader, config):
         # training
         policy.train()
         optimizer.zero_grad()
+        print(len(train_dataloader))
         for batch_idx, data in enumerate(train_dataloader):
             forward_dict = forward_pass(data, policy)
             # backward

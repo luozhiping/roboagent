@@ -1,5 +1,5 @@
 ### Robopen constants
-CAMERA_NAMES = ['rgb_left','rgb_top','rgb_right','rgb_wrist']
+CAMERA_NAMES = ['wrist', 'front', 'right', 'top']
 ## change this to train with less cameras
 
 
