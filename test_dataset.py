@@ -154,8 +154,8 @@ def main(args):
     for batch_idx, data in enumerate(train_dataloader):
         # if batch_idx != 2 and batch_idx != 1:
         #     continue
-        if batch_idx == 5:
-            break
+#        if batch_idx == 5:
+#            break
         print('**************:', batch_idx)
         with torch.inference_mode():
             image_data, qpos_data, action_data, is_pad, task_emb = data
@@ -169,10 +169,12 @@ def main(args):
                 begin = time.time()
                 all_actions = policy(qpos_data[t].unsqueeze(0), image_data[t].unsqueeze(0), task_emb=task_emb)
                 print(t, (begin - time.time()))
-                tt1 = np.degrees(post_process(all_actions[0][0].cpu())[:6])
-                dd1 = np.degrees(post_process(action_data[t].cpu())[:6])
-                print('test', tt1)
-                print('data', dd1)
+                tt1 = post_process(all_actions[0][0].cpu())[:6]
+                dd1 = post_process(action_data[t].cpu())[:6]
+                tt2 = post_process(all_actions[0][0].cpu())[6] * 450 + 900
+                dd2 = post_process(action_data[t].cpu())[6] * 450 + 900
+                print('test', tt1, tt2)
+                print('data', dd1, dd2)
                 all_test.append(tt1.numpy())
                 all_data.append(dd1.numpy())
                 # print(torch.abs(tt1 - dd1), torch.mean(torch.abs(tt1 - dd1)))

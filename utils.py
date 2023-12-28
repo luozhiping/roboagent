@@ -10,7 +10,7 @@ import random
 import glob
 import pickle
 from PIL import Image
-ACTION_ANGLE = 'radians'
+ACTION_ANGLE = 'angle'
 ACTION_GRIPPER  ='gripper_pos'
 ACTION_ANGLE_POS = 'radians_pos'
 
@@ -389,7 +389,7 @@ class EpisodicDatasetRobopen3(torch.utils.data.Dataset):
         files = list()
         randfiles = list()
         n = 100
-        files = pickle.load(open('train1130/train_data.pkl', 'rb'))
+        files = pickle.load(open('train1130/test.pkl', 'rb'))
         # files = sorted(glob.glob(os.path.join(dataset_dir + "*/*/", '*.h5')))
         for file in files:
             task_emb = TEXT_EMBEDDINGS[0]
