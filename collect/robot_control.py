@@ -6,6 +6,9 @@ from threading import Thread
 import pickle
 from _datetime import datetime
 import os
+import numpy as np
+
+
 # 1.舵机位置#000PRAD!
 # 2.sleep 1s 后开始记录
 class Control:
@@ -78,7 +81,12 @@ class Control:
                 print('pos_end:' , self.robot.get_robot_status())
             elif command == 's':
                 print('begin move')
-                self.begin_move()
+                for i in range(7):
+                    self.begin_move()
+                self.move_to([0, 0, 0, 0, 90, 0] + [2])
+                self.close()
+            elif command == 'x':
+                self.close()
 
 
     def open_camera(self):
@@ -131,25 +139,25 @@ class Control:
         # cv2.imwrite('image4.jpg', image4)
 
     def move_to(self, angles):
-        print(time.time(), ' begin enable')
+        # print(time.time(), ' begin enable')
         # self.robot.enable()
-        print(time.time(), ' end enable')
+        # print(time.time(), ' end enable')
         self.robot.movej(angles)
-        print(time.time(), 'submit move')
+        # print(time.time(), 'submit move')
         # robot.movel([-149, 432, 17, -114,-17,-97,8])
         time.sleep(0.5)
         # Monitor the task status and wait until the MoveJ operation is completed
-        print("Monitoring task status until the MoveJ operation is completed...")
+        # print("Monitoring task status until the MoveJ operation is completed...")
         while True:
             task_status = self.robot.get_task_status()
-            print(time.time(), task_status)
-            print(self.robot.get_robot_status())
+            # print(time.time(), task_status)
+            # print(self.robot.get_robot_status())
             if task_status.get('type') is None:  # Check if task has concluded
-                print("MoveJ operation completed.")
+                # print("MoveJ operation completed.")
                 # break
-                print(time.time(), 'stop move')
+                # print(time.time(), 'stop move')
                 self.robot.stop()
-                print(time.time(), 'end move')
+                # print(time.time(), 'end move')
                 return
             # else:
                 # self.robot.get_robot_status()['']
@@ -200,8 +208,11 @@ class Control:
 
     def begin_move(self):
         self.robot.enable()
-        self.move_to(Control.BEGIN_ANGLE + [2])
-        self.open_gripper()
+
+        gas = np.array(Control.BEGIN_ANGLE) + np.random.normal(loc=0.0, scale=6, size=6)
+        print(list(gas))
+        self.move_to(list(gas) + [2])
+        # self.open_gripper()
 
         for i in range(5):
             ret, image = self.cap.read()
@@ -217,21 +228,21 @@ class Control:
         self.recording = True
         t = Thread(target=self.record)
         t.start()
-        self.move_to(self.pos_start + [2])
+        self.move_to(self.pos_start + [3])
         # self.open_gripper()
         self.close_gripper()
-        self.move_to(self.pos_end + [2])
+        # self.move_to(self.pos_end + [2])
         # time.sleep(0.3)
-        self.open_gripper()
         self.recording = False
-        self.move_to([0, 0, 0, 0, 90, 0] + [2])
+        self.open_gripper()
+        # self.move_to([0, 0, 0, 0, 90, 0] + [2])
         # self.open_gripper()
-        self.close()
-        command = input('是否保存?')
-        if command == 'p':
-            epsoide_name = datetime.now().strftime("%m_%d_%H_%M_%S")
-            pickle.dump(self.data, open('output/%s/%s.pkl' % (self.folder_name, epsoide_name), 'wb'))
-            print('save to %s' % 'output/%s/%s.pkl' % (self.folder_name, epsoide_name))
+        # self.close()
+        # command = input('是否保存?')
+        # if command == 'p':
+        epsoide_name = datetime.now().strftime("%m_%d_%H_%M_%S")
+        pickle.dump(self.data, open('output/%s/%s.pkl' % (self.folder_name, epsoide_name), 'wb'))
+        print('save to %s' % 'output/%s/%s.pkl' % (self.folder_name, epsoide_name))
     def record(self):
         self.data.clear()
         while self.recording:

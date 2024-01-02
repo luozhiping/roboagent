@@ -1,5 +1,5 @@
 import pickle
-datas = pickle.load(open('output/12_25/12_25_21_59_00.pkl', 'rb'))
+datas = pickle.load(open('output/01_02/01_02_22_26_51.pkl', 'rb'))
 print(len(datas))
 for i in range(len(datas)):
     data = datas[i]
