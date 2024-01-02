@@ -17,7 +17,7 @@ for root, dirs, files in os.walk('./data/12_25', topdown=False):
 print(all_file)
 
 epsoides = []
-max_length = 57
+max_length = 32
 all_show = []
 min_p = np.array([-20, 0, 0, -30, 50, -50])
 max_p = np.array([10, 100, 100, 5, 110, 100])

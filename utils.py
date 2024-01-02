@@ -308,12 +308,12 @@ class EpisodicDatasetRobopenVal(torch.utils.data.Dataset):
         self.__getitem__(0)
 
     def __len__(self):
-        return len(self.episode_ids) * 50
+        return len(self.episode_ids) * 32
 
     def __getitem__(self, id):
         sample_full_episode = self.sample  # hardcode
-        idx = int(id / 50)
-        start_ts = id % 50
+        idx = int(id / 32)
+        start_ts = id % 32
         #print(idx, start_ts)
         trial_idx = self.episode_ids[idx]
         trial = self.trials[trial_idx]
